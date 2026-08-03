@@ -1,0 +1,44 @@
+{
+  "name": "student-course-management-api",
+  "version": "1.0.0",
+  "description": "REST API for managing students, courses, and enrollments using Node.js, Express, and TypeScript",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "tsx src/test-api.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "typescript",
+    "rest-api",
+    "students",
+    "courses"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "morgan": "^1.11.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^26.2.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.23.11",
+    "typescript": "^7.0.2"
+  }
+}
