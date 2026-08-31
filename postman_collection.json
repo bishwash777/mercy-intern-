@@ -1,0 +1,634 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Student Course Management System API",
+    "description": "Complete Postman collection for the Student Course Management System REST API built with Node.js, Express, and TypeScript.\n\n**Base URL:** `http://localhost:3000/api`\n\n**Setup:** Run requests in order: Students → Courses → Enrollments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "student_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "course_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "enrollment_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:3000/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["health"]
+            },
+            "description": "Check if the server is healthy and running."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Create Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Response has success true', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "    pm.collectionVariables.set('student_id', json.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"age\": 22\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["students"]
+            },
+            "description": "Create a new student. Auto-saves student ID to collection variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student - Duplicate Email (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Another Person\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+9999999999\",\n  \"age\": 25\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["students"]
+            },
+            "description": "Should return 409 Conflict — email already in use."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Student - Age Too Young (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Young Kid\",\n  \"email\": \"kid@example.com\",\n  \"phone\": \"+1111111111\",\n  \"age\": 14\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["students"]
+            },
+            "description": "Should return 400 — age must be greater than 15."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has data array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["students"]
+            },
+            "description": "Get all students (not soft-deleted)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Students - With Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/students?search=john&page=1&limit=10&sortBy=name&order=asc",
+              "host": ["{{base_url}}"],
+              "path": ["students"],
+              "query": [
+                { "key": "search", "value": "john" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "name" },
+                { "key": "order", "value": "asc" }
+              ]
+            },
+            "description": "Search students by name with pagination and sorting."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Student has correct ID', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.id).to.eql(parseInt(pm.collectionVariables.get('student_id')));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/students/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["students", "{{student_id}}"]
+            },
+            "description": "Get a single student by their ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Student By ID - Not Found (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/students/9999",
+              "host": ["{{base_url}}"],
+              "path": ["students", "9999"]
+            },
+            "description": "Should return 404 — student does not exist."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Name was updated', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.name).to.eql('John Updated Doe');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated Doe\",\n  \"age\": 23\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/students/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["students", "{{student_id}}"]
+            },
+            "description": "Update a student's information (partial update supported)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Student (Soft Delete)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Deletion was successful', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/students/{{student_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["students", "{{student_id}}"]
+            },
+            "description": "Soft-delete a student (sets isDeleted = true, does not remove from DB)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        {
+          "name": "Create Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Course created with ID', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.id).to.be.a('number');",
+                  "    pm.collectionVariables.set('course_id', json.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Node.js Fundamentals\",\n  \"description\": \"Learn Node.js from scratch including async patterns, streams, and REST APIs.\",\n  \"duration\": \"8 weeks\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/courses",
+              "host": ["{{base_url}}"],
+              "path": ["courses"]
+            },
+            "description": "Create a new course. Auto-saves course ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Course - Missing Title (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"No title course\",\n  \"duration\": \"4 weeks\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/courses",
+              "host": ["{{base_url}}"],
+              "path": ["courses"]
+            },
+            "description": "Should return 400 — course title is required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Courses",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/courses?page=1&limit=10&sortBy=title&order=asc",
+              "host": ["{{base_url}}"],
+              "path": ["courses"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "title" },
+                { "key": "order", "value": "asc" }
+              ]
+            },
+            "description": "Get all courses with pagination and sorting."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course By ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Get a single course by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Node.js Advanced\",\n  \"duration\": \"10 weeks\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Update a course's information."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Soft-delete a course."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Enroll Student in Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Enrollment has student and course', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data.student).to.have.property('id');",
+                  "    pm.expect(json.data.course).to.have.property('id');",
+                  "    pm.collectionVariables.set('enrollment_id', json.data.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": {{student_id}},\n  \"courseId\": {{course_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["enrollments"]
+            },
+            "description": "Enroll a student in a course. Uses collection variable IDs."
+          },
+          "response": []
+        },
+        {
+          "name": "Enroll Student - Duplicate (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": {{student_id}},\n  \"courseId\": {{course_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["enrollments"]
+            },
+            "description": "Should return 409 — duplicate enrollment."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Enrollments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Each enrollment has student and course', function () {",
+                  "    const json = pm.response.json();",
+                  "    if (json.data.length > 0) {",
+                  "        pm.expect(json.data[0]).to.have.property('student');",
+                  "        pm.expect(json.data[0]).to.have.property('course');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/enrollments",
+              "host": ["{{base_url}}"],
+              "path": ["enrollments"]
+            },
+            "description": "Get all enrollments with populated student and course info."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Courses of a Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response has student name and courses array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.have.property('student');",
+                  "    pm.expect(json.data.courses).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/students/{{student_id}}/courses",
+              "host": ["{{base_url}}"],
+              "path": ["students", "{{student_id}}", "courses"]
+            },
+            "description": "Get all courses a specific student is enrolled in."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Students of a Course",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}", "students"]
+            },
+            "description": "Get all students enrolled in a specific course."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Enrollment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Deletion successful', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/enrollments/{{enrollment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["enrollments", "{{enrollment_id}}"]
+            },
+            "description": "Delete an enrollment by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Enrollment - Not Found (404)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/enrollments/9999",
+              "host": ["{{base_url}}"],
+              "path": ["enrollments", "9999"]
+            },
+            "description": "Should return 404 — enrollment does not exist."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
